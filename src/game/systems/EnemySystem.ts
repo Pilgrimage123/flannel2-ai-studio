@@ -71,7 +71,7 @@ export class EnemySystem {
   private spawnAcc = 0;
   private swarmAcc = 5;
   private squadAcc = 10;
-  nextBoss = 55; // First boss (S-400) at 55s!
+  nextBoss = 60; // First boss (S-400) at 60s!
   bossCount = 0;
   private eid = 1;
   private initialSpawned = false;
@@ -100,7 +100,7 @@ export class EnemySystem {
     this.spawnAcc = 0;
     this.swarmAcc = 5;
     this.squadAcc = 10;
-    this.nextBoss = 55;
+    this.nextBoss = 60;
     this.bossCount = 0;
     this.eid = 1;
     this.initialSpawned = false;
@@ -117,6 +117,24 @@ export class EnemySystem {
   startEndlessMode() {
     this.endlessMode = true;
     this.nextBoss = this.ctx.timeSurvived + 45;
+  }
+
+  getNextBossTime(): number {
+    if (this.endlessMode) {
+      return this.nextBoss;
+    }
+    if (!this.prigozhinSpawned) {
+      if (this.ctx.timeSurvived < this.nextBoss && this.nextBoss <= 300) {
+        return this.nextBoss;
+      }
+      return 300;
+    }
+    return this.nextBoss;
+  }
+
+  getNextBossCountdown(timeSurvived: number): number {
+    const target = this.getNextBossTime();
+    return Math.max(0, target - timeSurvived);
   }
 
   getActiveBoss(): BossInfo | null {
@@ -139,6 +157,21 @@ export class EnemySystem {
         maxHp: Math.round(e.max),
         isFinale: false,
       };
+    }
+    for (const s of this.activeEnemies) {
+      if (s.active) {
+        const e = this.ed(s);
+        if (e.kind === "boss") {
+          this.currentBossSprite = s;
+          return {
+            name: "INFLATABLE S-400 DECOY BATTERY",
+            kind: "boss",
+            hp: Math.max(0, Math.round(e.hp)),
+            maxHp: Math.round(e.max),
+            isFinale: false,
+          };
+        }
+      }
     }
     return null;
   }
@@ -220,51 +253,58 @@ export class EnemySystem {
 
   rollKind(): Kind {
     const t = this.ctx.timeSurvived;
-    if (t < 15) {
-      // Wave 1: Grunts with fast Kadyrovite / TikTok sharpshooters
-      return Math.random() < 0.42 ? "tiktok" : "conscript";
-    }
-    if (t < 35) {
-      // Wave 2: Attack dogs sniffing out Pavel + TikTok snipers + Conscripts
+    if (t < 25) {
+      // Wave 1 (0-25s): Grunts, TikTok sharpshooters, scouting Attack Dogs, occasional Golf Cart
       const r = Math.random();
-      if (r < 0.35) return "dog";
-      if (r < 0.65) return "tiktok";
+      if (r < 0.45) return "conscript";
+      if (r < 0.72) return "tiktok";
+      if (r < 0.90) return "dog";
+      return "cart";
+    }
+    if (t < 60) {
+      // Wave 2 (25-60s): Attack Dogs sniffing stealth + Golf Carts + Kamikaze dive bombers + TikTok + Conscripts
+      const r = Math.random();
+      if (r < 0.28) return "cart";
+      if (r < 0.52) return "dog";
+      if (r < 0.72) return "kamikaze";
+      if (r < 0.88) return "tiktok";
       return "conscript";
     }
-    if (t < 55) {
-      // Wave 3: Shield Troopers + Kamikaze dive bombers + Golf Carts
+    if (t < 120) {
+      // Wave 3 (60-120s): Shield Troopers + Kamikaze dive drones + Golf Carts + Turtle Tanks + Dogs
       const r = Math.random();
       if (r < 0.28) return "riot";
-      if (r < 0.52) return "kamikaze";
-      if (r < 0.76) return "cart";
-      return "conscript";
-    }
-    if (t < 90) {
-      // Wave 4-5: Heavy Armor - Turtle tanks + Golf Carts + Riot Shields + Kamikazes
-      const r = Math.random();
-      if (r < 0.26) return "turtle";
-      if (r < 0.46) return "cart";
-      if (r < 0.66) return "riot";
-      if (r < 0.84) return "kamikaze";
+      if (r < 0.50) return "kamikaze";
+      if (r < 0.70) return "cart";
+      if (r < 0.85) return "turtle";
       return "dog";
     }
-    if (t < 135) {
-      // Wave 6: Elite combined arms horde
+    if (t < 180) {
+      // Wave 4 (120-180s): Heavy Armor push - Turtle tanks + Riot Shields + Kamikazes + Golf Carts
+      const r = Math.random();
+      if (r < 0.26) return "turtle";
+      if (r < 0.50) return "riot";
+      if (r < 0.72) return "kamikaze";
+      if (r < 0.88) return "cart";
+      return "dog";
+    }
+    if (t < 240) {
+      // Wave 5 (180-240s): Elite combined arms horde - all archetypes active
       const r = Math.random();
       if (r < 0.24) return "turtle";
       if (r < 0.44) return "riot";
       if (r < 0.62) return "kamikaze";
       if (r < 0.78) return "cart";
-      if (r < 0.9) return "dog";
+      if (r < 0.90) return "dog";
       return "tiktok";
     }
-    // Wave 7+: Intense frenzy of all enemy archetypes
+    // Wave 6+ (240s - 300s+): Intense frenzy leading into and during the 5-minute Grand Finale!
     const r = Math.random();
-    if (r < 0.22) return "turtle";
-    if (r < 0.4) return "kamikaze";
-    if (r < 0.56) return "cart";
-    if (r < 0.72) return "riot";
-    if (r < 0.86) return "dog";
+    if (r < 0.24) return "turtle";
+    if (r < 0.44) return "kamikaze";
+    if (r < 0.62) return "riot";
+    if (r < 0.78) return "cart";
+    if (r < 0.90) return "dog";
     return "tiktok";
   }
 
@@ -272,11 +312,12 @@ export class EnemySystem {
   private ensureFreeSlots(needed: number) {
     const px = this.ctx.player.x;
     const py = this.ctx.player.y;
-    while (this._activeCount > 620 && needed > 0) {
+    while ((this._activeCount + needed >= 650 || this.enemies.getLength() + needed >= 700) && this._activeCount > 0 && needed > 0) {
       // Find furthest basic conscript or tiktok
       let furthest: Phaser.Physics.Arcade.Sprite | null = null;
       let maxD = 0;
       for (const s of this.activeEnemies) {
+        if (!s.active) continue;
         const k = this.ed(s).kind;
         if (k === "boss" || k === "prigozhin") continue;
         const d = (s.x - px) * (s.x - px) + (s.y - py) * (s.y - py);
@@ -327,7 +368,6 @@ export class EnemySystem {
 
   spawnBoss() {
     this.ensureFreeSlots(18);
-    this.bossCount += 1;
     const cam = this.ctx.cam;
     const dist = (Math.max(cam.width, cam.height) * 0.58) / cam.zoom;
     const ang = Math.random() * Math.PI * 2;
@@ -385,8 +425,12 @@ export class EnemySystem {
   }
 
   birth(kind: Kind, x: number, y: number): Phaser.Physics.Arcade.Sprite | null {
-    const s = this.enemies.get(x, y, KIND_TEX[kind]) as Phaser.Physics.Arcade.Sprite | null;
-    if (!s) return null;
+    let s = this.enemies.get(x, y, KIND_TEX[kind]) as Phaser.Physics.Arcade.Sprite | null;
+    if (!s) {
+      this.ensureFreeSlots(6);
+      s = this.enemies.get(x, y, KIND_TEX[kind]) as Phaser.Physics.Arcade.Sprite | null;
+      if (!s) return null;
+    }
     s.enableBody(true, x, y, true, true);
     s.clearTint();
     const pressure = this.pressure();
@@ -476,6 +520,10 @@ export class EnemySystem {
     e.face = Math.random() < 0.5 ? -1 : 1;
     e.shoot = 0.45 + Math.random() * 0.6;
     e.hitCd = 0;
+    delete e.slamCd;
+    delete e.summonCd;
+    delete e.phraseCd;
+    delete e.enraged;
     const dir = Math.atan2(this.ctx.player.y - y, this.ctx.player.x - x);
     e.aim = dir;
     e.vx = Math.cos(dir) * e.speed;
@@ -555,17 +603,26 @@ export class EnemySystem {
     }
 
     // Boss scheduling:
-    // Wave 3 (55s): Inflatable S-400 Boss 1
-    // Wave 7 (125s): Inflatable S-400 Boss 2
-    // Wave 9 (180s): GRAND FINALE: BIG ZOMBIE PRIGOŽIN CLONE!
-    if (!this.prigozhinSpawned && this.ctx.timeSurvived >= 180) {
+    // Wave 3 (60s): Inflatable S-400 Boss 1
+    // Wave 5 (135s): Inflatable S-400 Boss 2
+    // Wave 7 (210s): Inflatable S-400 Boss 3
+    // 5 Minutes (300s): GRAND FINALE: BIG ZOMBIE PRIGOŽIN CLONE!
+    if (!this.prigozhinSpawned && this.ctx.timeSurvived >= 300) {
       this.prigozhinSpawned = true;
+      this.nextBoss = this.endlessMode ? this.ctx.timeSurvived + 60 : 300;
       this.spawnPrigozhin();
-    } else if (this.ctx.timeSurvived >= this.nextBoss && this.ctx.timeSurvived < 172) {
-      this.nextBoss += 70; // 55s -> 125s
+    } else if (!this.prigozhinSpawned && this.ctx.timeSurvived >= this.nextBoss && this.ctx.timeSurvived < 290) {
+      this.bossCount += 1;
+      if (this.bossCount === 1) {
+        this.nextBoss = 135;
+      } else if (this.bossCount === 2) {
+        this.nextBoss = 210;
+      } else {
+        this.nextBoss = 300;
+      }
       this.spawnBoss();
     } else if (this.endlessMode && this.ctx.timeSurvived >= this.nextBoss) {
-      this.nextBoss += 60;
+      this.nextBoss = this.ctx.timeSurvived + 60;
       if (Math.random() < 0.5) this.spawnPrigozhin();
       else this.spawnBoss();
     }
@@ -585,36 +642,42 @@ export class EnemySystem {
       }
     }
 
-    // Specialized Squad Rushes
+    // Specialized Squad Rushes (cycles dynamically every 8-12 seconds)
     this.swarmAcc -= dt;
     if (this.swarmAcc <= 0) {
-      this.swarmAcc = clamp(9.0 - this.ctx.timeSurvived * 0.015, 4.0, 9.0);
+      this.swarmAcc = clamp(10.0 - this.ctx.timeSurvived * 0.015, 5.0, 10.0);
       const t = this.ctx.timeSurvived;
-      if (t >= 18 && t < 45) {
+      const rushPhase = Math.floor(t / 25) % 5;
+      if (rushPhase === 0 && t >= 12) {
         // K9 Attack Dog Pack!
         this.spawnBatch("dog", 5, cap);
         this.ctx.floater(this.ctx.player.x, this.ctx.player.y - 45, "🐕 K9 RECON PACK INBOUND!", "#ffd6a0");
-      } else if (t >= 45 && t < 80) {
+      } else if (rushPhase === 1) {
         // Suicide Drone Kamikaze Swarm!
-        this.spawnBatch("kamikaze", 9, cap);
+        this.spawnBatch("kamikaze", 8, cap);
         this.ctx.floater(this.ctx.player.x, this.ctx.player.y - 45, "⚡ KAMIKAZE SWARM DIVE!", "#ff4d4d");
-      } else if (t >= 80 && t < 120) {
-        // Golf Cart Blitz!
+      } else if (rushPhase === 2) {
+        // Golf Cart Motorcade!
         this.spawnBatch("cart", 6, cap);
         this.ctx.floater(this.ctx.player.x, this.ctx.player.y - 45, "🏎️ GOLF CART MOTORCADE!", "#ffd60a");
-      } else if (t >= 120) {
-        // Turtle Tank & Kamikaze assault!
+      } else if (rushPhase === 3) {
+        // Shield Wall Phalanx!
+        this.spawnBatch("riot", 6, cap);
+        this.ctx.floater(this.ctx.player.x, this.ctx.player.y - 45, "🛡️ RIOT SHIELD PHALANX!", "#64dfdf");
+      } else if (rushPhase === 4) {
+        // Turtle Tank Squadron!
         this.spawnBatch("turtle", 4, cap);
-        this.spawnBatch("kamikaze", 6, cap);
+        this.spawnBatch("kamikaze", 5, cap);
+        this.ctx.floater(this.ctx.player.x, this.ctx.player.y - 45, "🐢 TURTLE TANK SQUADRON!", "#72efdd");
       }
     }
 
     // Heavy Shield Wall / Armor columns
     this.squadAcc -= dt;
     if (this.squadAcc <= 0) {
-      this.squadAcc = clamp(12 - this.ctx.timeSurvived * 0.02, 6.0, 12);
+      this.squadAcc = clamp(14 - this.ctx.timeSurvived * 0.02, 6.0, 14);
       if (this.ctx.timeSurvived > 25) {
-        const squadKind: Kind = this.ctx.timeSurvived > 70 && Math.random() < 0.5 ? "turtle" : "riot";
+        const squadKind: Kind = this.ctx.timeSurvived > 90 && Math.random() < 0.5 ? "turtle" : "riot";
         this.spawnBatch(squadKind, 5, cap);
       }
     }

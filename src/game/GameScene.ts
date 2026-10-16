@@ -196,15 +196,23 @@ export class GameScene extends Phaser.Scene {
 
     this.dog = this.add.sprite(this.player.x, this.player.y, "shiba").setVisible(false).setDepth(9);
     this.dressImage(this.dog, "shiba", 48);
-
+    const self = this;
     this.enemySystem = new EnemySystem(
       {
         player: this.player,
         decoy: this.decoy,
-        stealth: this.stealth,
-        dashT: this.dashT,
-        alive: this.alive,
-        timeSurvived: this.timeSurvived,
+        get stealth() {
+          return self.stealth;
+        },
+        get dashT() {
+          return self.dashT;
+        },
+        get alive() {
+          return self.alive;
+        },
+        get timeSurvived() {
+          return self.timeSurvived;
+        },
         cam,
         shakeCam: (dur, int) => this.shakeCam(dur, int),
         hurtPlayer: (amt, ts, hif) => this.hurtPlayer(amt, ts, hif),
@@ -1023,7 +1031,7 @@ export class GameScene extends Phaser.Scene {
           ? 1 + this.ambushStacks * 0.35
           : 1,
       wave,
-      nextBoss: Math.max(0, this.enemySystem.nextBoss - this.timeSurvived),
+      nextBoss: this.enemySystem.getNextBossCountdown(this.timeSurvived),
       activeBoss: this.enemySystem.getActiveBoss(),
       ambush: Math.max(0, this.ambushT),
       weapons: this.weaponSystem.weapons.map((w) => w.id),

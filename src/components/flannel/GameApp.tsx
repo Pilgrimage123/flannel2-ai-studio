@@ -516,7 +516,13 @@ function PlayChrome({
         <div className="hud-card meter">
           <span>WAVE {stats?.wave ?? 1}</span>
           <b>{formatTime(stats?.time ?? 0)}</b>
-          <span>BOSS {formatTime(stats?.nextBoss ?? 180)}</span>
+          <span>
+            {stats?.activeBoss
+              ? "⚠️ BOSS FIGHT!"
+              : (stats?.time ?? 0) >= 210 && (stats?.time ?? 0) < 300
+                ? `FINALE ${formatTime(stats?.nextBoss ?? 0)}`
+                : `BOSS ${formatTime(stats?.nextBoss ?? 0)}`}
+          </span>
         </div>
         <div className="hud-card meter">
           <span>KILLS</span>
@@ -547,6 +553,25 @@ function PlayChrome({
           </button>
         </div>
       </header>
+
+      {stats?.activeBoss ? (
+        <div className={`boss-health-bar ${stats.activeBoss.isFinale ? "finale-boss" : ""}`}>
+          <div className="boss-title">
+            <span>{stats.activeBoss.name}</span>
+            <b>
+              {stats.activeBoss.hp.toLocaleString()} / {stats.activeBoss.maxHp.toLocaleString()} HP
+            </b>
+          </div>
+          <div className="boss-track">
+            <div
+              className="boss-fill"
+              style={{
+                width: `${Math.max(0, Math.min(100, (stats.activeBoss.hp / Math.max(1, stats.activeBoss.maxHp)) * 100))}%`,
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <Stick />
       <button
         type="button"
