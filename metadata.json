@@ -1,0 +1,6 @@
+{
+  "name": "Operation: Flannel Storm",
+  "description": "General Pavel's one-button flannel ambush. A 16-bit bullet heaven.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
