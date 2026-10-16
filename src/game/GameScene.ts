@@ -714,8 +714,12 @@ export class GameScene extends Phaser.Scene {
   private tickPlayerLook() {
     const key = this.stealth ? "pavel-stealth" : "pavel-loud";
     const animatedKey = `${key}-animated`;
-    if (this.textures.exists(animatedKey)) {
-      if (this.player.texture.key !== animatedKey) this.dress(this.player, animatedKey, 78, 0.34);
+    const hasAnimatedSheet = this.textures.exists(animatedKey);
+    if (hasAnimatedSheet) {
+      if (this.player.texture.key !== animatedKey) {
+        this.dress(this.player, animatedKey, 78, 0.34);
+        this.player.anims.stop();
+      }
       const body = this.player.body as Phaser.Physics.Arcade.Body;
       const moving = Math.hypot(body.velocity.x, body.velocity.y) > 8;
       const state = this.dashT > 0 ? "dash" : moving ? "run" : "idle";
@@ -724,6 +728,7 @@ export class GameScene extends Phaser.Scene {
         this.player.play(animationKey);
       }
     } else if (this.player.texture.key !== key) {
+      this.player.anims.stop();
       this.dress(this.player, key, 78, 0.34);
     }
     this.player.setFlipX(this.faceX < 0);
