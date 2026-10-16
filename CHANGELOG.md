@@ -7,6 +7,7 @@ All notable changes to **Operation: Flannel Storm** are documented in this file.
 ### Animated Pavel Sprite Runtime Support
 - Added optional loading for transparent 128×128-frame Pavel spritesheets for loud and stealth outfits.
 - Registered idle (8 frames), run (8 frames), and dash (6 frames) loops and switched states from movement/dash status when corresponding sheets exist.
+- Reset animation playback when switching between the animated and legacy costume textures.
 - Preserved existing static sprites as a fallback; actual sprite-sheet PNGs still need to be generated and committed before the animated path activates.
 
 ### Petr Pavel Sprite Art Direction
