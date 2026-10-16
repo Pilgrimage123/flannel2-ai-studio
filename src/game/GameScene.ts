@@ -682,6 +682,12 @@ export class GameScene extends Phaser.Scene {
 
   private tickPlayerLook() {
     const key = this.stealth ? "pavel-stealth" : "pavel-loud";
+    // The player is a persistent scene object, not a pooled projectile. Keep it
+    // renderable if a collision/effect path accidentally hides or deactivates it.
+    if (!this.player.active) this.player.setActive(true);
+    if (!this.player.visible) this.player.setVisible(true);
+    if (this.player.alpha <= 0) this.player.setAlpha(1);
+
     if (this.player.texture.key !== key) this.dress(this.player, key, 78, 0.34);
     this.player.setFlipX(this.faceX < 0);
     const moving = Math.hypot(
@@ -689,7 +695,8 @@ export class GameScene extends Phaser.Scene {
       (this.player.body as Phaser.Physics.Arcade.Body).velocity.y,
     );
     this.player.setRotation(moving > 8 ? Math.sin(this.timeSurvived * 14) * 0.05 : 0);
-    this.player.setDepth(this.player.y);
+    // Keep painter order finite even if a bad position leaks into the scene.
+    this.player.setDepth(clamp(this.player.y, 0, WORLD));
 
     if (this.beerRage > 0) {
       this.player.setTint(Math.sin(this.timeSurvived * 26) > 0 ? 0xffd700 : 0xff9500);

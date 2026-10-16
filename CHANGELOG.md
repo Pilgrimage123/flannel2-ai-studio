@@ -4,6 +4,9 @@ All notable changes to **Operation: Flannel Storm** are documented in this file.
 
 ## [Unreleased] - 2026-10-16
 
+### Bug Fixes
+- **Player Sprite Visibility Recovery**: Added a defensive per-frame guard to restore the persistent player sprite's active/visible state and recover a fully transparent alpha value. Clamped its render depth to the world bounds to avoid invalid/extreme painter ordering during long arena sessions.
+
 ### Gameplay & Grand Finale
 - **5-Minute Grand Finale Boss Encounter**:
   - Scheduled the climactic final boss battle against **Big Zombie Prigožin Clone (Warlord)** to spawn at the 5-minute (300s) mark.
