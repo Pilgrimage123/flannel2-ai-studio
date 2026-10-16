@@ -4,6 +4,11 @@ All notable changes to **Operation: Flannel Storm** are documented in this file.
 
 ## [Unreleased] - 2026-10-16
 
+### Animated Pavel Sprite Runtime Support
+- Added optional loading for transparent 128×128-frame Pavel spritesheets for loud and stealth outfits.
+- Registered idle (8 frames), run (8 frames), and dash (6 frames) loops and switched states from movement/dash status when corresponding sheets exist.
+- Preserved existing static sprites as a fallback; actual sprite-sheet PNGs still need to be generated and committed before the animated path activates.
+
 ### Petr Pavel Sprite Art Direction
 - Added `docs/PAVEL_SPRITE_ANIMATION.md` documenting the two costume references, transparent-background requirements, animation loops, Phaser integration constraints, and acceptance checks for detailed, smooth pixel-art player sprites.
 - Kept the existing `pavel-loud` and `pavel-stealth` runtime assets as-is; the supplied reference illustrations are not yet verified transparent animation sheets.
