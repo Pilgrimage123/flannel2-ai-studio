@@ -695,7 +695,8 @@ export class GameScene extends Phaser.Scene {
       (this.player.body as Phaser.Physics.Arcade.Body).velocity.y,
     );
     this.player.setRotation(moving > 8 ? Math.sin(this.timeSurvived * 14) * 0.05 : 0);
-    // Keep painter order finite even if a bad position leaks into the scene.\n    this.player.setDepth(clamp(this.player.y, 0, WORLD));
+    // Keep painter order finite even if a bad position leaks into the scene.
+    this.player.setDepth(clamp(this.player.y, 0, WORLD));
 
     if (this.beerRage > 0) {
       this.player.setTint(Math.sin(this.timeSurvived * 26) > 0 ? 0xffd700 : 0xff9500);
