@@ -154,6 +154,13 @@ export class GameScene extends Phaser.Scene {
     ];
     for (const key of files) this.load.image(key, `/sprites/${key}.png`);
     this.load.image("ground", "/sprites/ground.jpg");
+    // Optional transparent sprite sheets; absent assets safely fall back to legacy PNGs.
+    for (const mode of ["loud", "stealth"]) {
+      this.load.spritesheet(`pavel-${mode}-animated`, `/sprites/pavel-${mode}-animated.png`, {
+        frameWidth: 128,
+        frameHeight: 128,
+      });
+    }
   }
 
   create() {
@@ -181,6 +188,7 @@ export class GameScene extends Phaser.Scene {
 
     this.player = this.physics.add.sprite(WORLD / 2, WORLD / 2, "pavel-loud");
     this.dress(this.player, "pavel-loud", 78, 0.34);
+    this.registerPavelAnimations();
     this.player.setCollideWorldBounds(true);
     this.player.setDepth(10);
     cam.startFollow(this.player, true, 0.14, 0.14);
@@ -680,9 +688,49 @@ export class GameScene extends Phaser.Scene {
     } else this.player.setAlpha(1);
   }
 
+  private registerPavelAnimations() {
+    for (const mode of ["loud", "stealth"]) {
+      const texture = `pavel-${mode}-animated`;
+      // Phaser's loader skips missing assets; do not remove the fallback sprites.
+      if (!this.textures.exists(texture)) continue;
+      for (const [state, start, end, frameRate] of [
+        ["idle", 0, 7, 8],
+        ["run", 8, 15, 12],
+        ["dash", 16, 21, 16],
+      ] as const) {
+        const key = `${texture}-${state}`;
+        if (!this.anims.exists(key)) {
+          this.anims.create({
+            key,
+            frames: this.anims.generateFrameNumbers(texture, { start, end }),
+            frameRate,
+            repeat: -1,
+          });
+        }
+      }
+    }
+  }
+
   private tickPlayerLook() {
     const key = this.stealth ? "pavel-stealth" : "pavel-loud";
-    if (this.player.texture.key !== key) this.dress(this.player, key, 78, 0.34);
+    const animatedKey = `${key}-animated`;
+    const hasAnimatedSheet = this.textures.exists(animatedKey);
+    if (hasAnimatedSheet) {
+      if (this.player.texture.key !== animatedKey) {
+        this.dress(this.player, animatedKey, 78, 0.34);
+        this.player.anims.stop();
+      }
+      const body = this.player.body as Phaser.Physics.Arcade.Body;
+      const moving = Math.hypot(body.velocity.x, body.velocity.y) > 8;
+      const state = this.dashT > 0 ? "dash" : moving ? "run" : "idle";
+      const animationKey = `${animatedKey}-${state}`;
+      if (this.anims.exists(animationKey) && this.player.anims.currentAnim?.key !== animationKey) {
+        this.player.play(animationKey);
+      }
+    } else if (this.player.texture.key !== key) {
+      this.player.anims.stop();
+      this.dress(this.player, key, 78, 0.34);
+    }
     this.player.setFlipX(this.faceX < 0);
     const moving = Math.hypot(
       (this.player.body as Phaser.Physics.Arcade.Body).velocity.x,
