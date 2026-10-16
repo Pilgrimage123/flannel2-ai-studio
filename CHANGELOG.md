@@ -4,6 +4,10 @@ All notable changes to **Operation: Flannel Storm** are documented in this file.
 
 ## [Unreleased] - 2026-10-16
 
+### Petr Pavel Sprite Art Direction
+- Added `docs/PAVEL_SPRITE_ANIMATION.md` documenting the two costume references, transparent-background requirements, animation loops, Phaser integration constraints, and acceptance checks for detailed, smooth pixel-art player sprites.
+- Kept the existing `pavel-loud` and `pavel-stealth` runtime assets as-is; the supplied reference illustrations are not yet verified transparent animation sheets.
+
 ### Gameplay & Grand Finale
 - **5-Minute Grand Finale Boss Encounter**:
   - Scheduled the climactic final boss battle against **Big Zombie Prigožin Clone (Warlord)** to spawn at the 5-minute (300s) mark.
