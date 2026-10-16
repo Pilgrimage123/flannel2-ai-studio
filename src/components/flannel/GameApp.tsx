@@ -425,6 +425,7 @@ function PlayChrome({
   onResume,
   onChoose,
   onAgain,
+  onEndless,
   onMenu,
 }: {
   stats: Stats | null;
@@ -437,6 +438,7 @@ function PlayChrome({
   onResume: () => void;
   onChoose: (id: UpgradeId) => void;
   onAgain: () => void;
+  onEndless?: () => void;
   onMenu: () => void;
 }) {
   const hpPct = stats ? Math.max(0, Math.min(100, (stats.hp / stats.maxHp) * 100)) : 100;
@@ -633,9 +635,13 @@ function PlayChrome({
       {over ? (
         <div className="overlay-center">
           <div className="over-card">
-            <div className="rank-badge">🎖️ {over.rankTitle || "FRONT-LINE WARRIOR"}</div>
-            <h2>PAVEL IS DOWN</h2>
-            <p className="note">The washing machine outlasted the general. Barely.</p>
+            <div className="rank-badge">🎖️ {over.rankTitle || (over.victory ? "HERO OF UKRAINE" : "FRONT-LINE WARRIOR")}</div>
+            <h2>{over.victory ? "VICTORY IN UKRAINE!" : "PAVEL IS DOWN"}</h2>
+            <p className="note">
+              {over.victory
+                ? "The invaders have been routed! General Pavel stands victorious."
+                : "The washing machine outlasted the general. Barely."}
+            </p>
             <div className="over-grid">
               <div className="stat">
                 <span>TIME</span>
@@ -659,6 +665,11 @@ function PlayChrome({
               </div>
             </div>
             <div className="row-actions">
+              {over.victory && onEndless ? (
+                <button onClick={onEndless} style={{ background: "linear-gradient(135deg, #ffd700, #ff8800)", color: "#111", fontWeight: "bold" }}>
+                  CONTINUE PATROL (ENDLESS)
+                </button>
+              ) : null}
               <button onClick={onAgain}>DEPLOY AGAIN</button>
               <button className="ghost" onClick={onMenu}>
                 BRIEFING
