@@ -4,6 +4,33 @@ All notable changes to **Operation: Flannel Storm** are documented in this file.
 
 ## [Unreleased] - 2026-10-16
 
+### Gameplay & Grand Finale
+- **5-Minute Grand Finale Boss Encounter**:
+  - Scheduled the climactic final boss battle against **Big Zombie Prigožin Clone (Warlord)** to spawn at the 5-minute (300s) mark.
+  - Accompanied by Wagner shockguard convoy, iconic quotes ("WHERE IS THE AMMUNITION?!"), sledgehammer ground slams, explosive ammo crate projectiles, and an enraged phase below 50% HP.
+  - Defeating the final boss triggers an epic finale sequence: mass enemy retreat, victory fanfare, confetti and fireworks, a grand loot shower, and an victory screen awarding "SUPREME ALLIED FIELD MARSHAL" with an option to continue into **Endless Patrol Mode**.
+- **Boss Scheduling & Escalation**:
+  - Paced intermediate boss battles: Inflatable S-400 Decoy Battery at 60s, Hardened S-400 at 135s, and Twin S-400 Batteries at 210s.
+  - Endless mode alternates between Inflatable S-400 Batteries and Prigožin Clones every 60–65 seconds.
+- **Dynamic Squad Rushes**:
+  - Specialized squad rushes cycle dynamically every ~25 seconds: K9 Attack Dog packs, Suicide Drone Kamikaze swarms, Golf Cart motorcades, Riot Shield phalanxes, and Turtle Tank squadrons.
+- **Boss Encounter Health Bar & HUD Indicators**:
+  - Added a dedicated pixel-styled HUD boss health bar (`.boss-health-bar`) with boss name, HP readout, and an animated pulsing glow for the grand finale.
+  - Integrated smart HUD countdown timers showing `BOSS mm:ss`, `FINALE mm:ss`, or `⚠️ BOSS FIGHT!`.
+
+### Bug Fixes & Refinements
+- **Enemy & Boss Spawning State Desync**:
+  - Fixed a critical bug where primitive copies of `timeSurvived`, `stealth`, `dashT`, and `alive` were passed to `EnemySystem`, leaving `timeSurvived` permanently frozen at `0`.
+  - Converted `EnemyContext` properties to live getters closed over `GameScene`, restoring enemy wave escalations, attack dog sniffing, stealth immunity, and boss triggers.
+- **Wave Progression & Archetype Variety**:
+  - Rebalanced `rollKind()` across the 5-minute run so all 8 enemy archetypes spawn smoothly across escalating waves instead of only spawning basic grunts.
+  - Added pool exhaustion fallback in `birth()` to guarantee boss and squad spawns are never dropped.
+  - Sanitized boss attack timers on recycled sprite bodies to prevent basic grunts from inheriting boss attacks.
+- **UI & TypeScript Integrity**:
+  - Fixed TypeScript prop typing for `onEndless` in `PlayChrome` and connected the victory continuation flow to Endless Patrol mode.
+
+## [0.2.0] - 2026-10-16
+
 ### Architecture & Modularity
 - **Subsystem Decomposition**: Refactored monolithic `GameScene.ts` (~1,828 lines) into dedicated, cohesive subsystems:
   - `src/game/systems/EnemySystem.ts`: Encapsulates AI behaviors for all 8 enemy types, spawner progression, riot shield mechanics, combat hit registration, and enemy death drops.
